@@ -1,0 +1,94 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Entity {
+  id               Int          @id @default(autoincrement())
+  entityType       EntityType
+  businessName     String
+  ownerFirstName   String
+  ownerLastName    String
+  phoneNumber      String
+  email            String       @unique
+  isRegistered     Boolean
+  upiId            String?
+  status           Status       @default(ACTIVE)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  address          Address?     
+  bankDetails      BankDetails?
+  memberships      Membership[]
+}
+
+model Address {
+  id          Int     @id @default(autoincrement())
+  entityId    Int     @unique
+  addressLine1 String
+  addressLine2 String?
+  city        String
+  district    String
+  state       String
+  country     String
+  pinCode     String
+  entity      Entity  @relation(fields: [entityId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model BankDetails {
+  id                Int     @id @default(autoincrement())
+  entityId          Int     @unique
+  bankName          String
+  accountHolderName String
+  accountNumber     String
+  ifscCode          String
+  entity            Entity  @relation(fields: [entityId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model SubscriptionPlan {
+  id          Int      @id @default(autoincrement())
+  planName    String
+  planCost    Float
+  memberships Membership[]
+  couponCodes CouponCode[]
+}
+
+model Membership {
+  id               Int     @id @default(autoincrement())
+  entityId         Int
+  subscriptionPlanId Int
+  startDate        DateTime @default(now())
+  endDate          DateTime
+  entity           Entity @relation(fields: [entityId], references: [id])
+  subscriptionPlan SubscriptionPlan @relation(fields: [subscriptionPlanId], references: [id])
+}
+
+model CouponCode {
+  id                 Int        @id @default(autoincrement())
+  couponName         String
+  expiryDate         DateTime
+  restriction        String
+  subscriptionPlanId Int
+  subscriptionPlan   SubscriptionPlan @relation(fields: [subscriptionPlanId], references: [id])
+}
+
+enum EntityType {
+  AGENCY
+  FREELANCER
+  COMPANY
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+  TRASHED
+}
