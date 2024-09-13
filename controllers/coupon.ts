@@ -6,9 +6,6 @@ export default {
   getAllCoupons: async (req: Request, res: Response) => {
     try {
       const coupons = await prisma.couponCode.findMany({
-        include: {
-          subscriptionPlan: true,
-        },
       });
       res.json(coupons);
     } catch (error) {
@@ -21,9 +18,6 @@ export default {
     try {
       const coupon = await prisma.couponCode.findUnique({
         where: { id: parseInt(id, 10) },
-        include: {
-          subscriptionPlan: true,
-        },
       });
       if (!coupon) {
         return res.status(404).json({ error: 'Coupon not found' });
@@ -35,14 +29,15 @@ export default {
   },
 
   createCoupon: async (req: Request, res: Response) => {
-    const { couponName, expiryDate, restriction, subscriptionPlanId } = req.body;
+    const { couponName, expiryDate, startDate, status, validForPlanId } = req.body;
     try {
       const coupon = await prisma.couponCode.create({
         data: {
           couponName,
+          startDate: new Date(startDate),
           expiryDate: new Date(expiryDate),
-          restriction,
-          subscriptionPlan: { connect: { id: subscriptionPlanId } },
+          status,
+          validForPlanId,
         },
       });
       res.status(201).json(coupon);
@@ -53,15 +48,16 @@ export default {
 
   updateCoupon: async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { couponName, expiryDate, restriction, subscriptionPlanId } = req.body;
+    const { couponName, expiryDate, startDate, status, validForPlanId } = req.body;
     try {
       const coupon = await prisma.couponCode.update({
         where: { id: parseInt(id, 10) },
         data: {
           couponName,
+          status,
+          startDate: new Date(startDate),
           expiryDate: new Date(expiryDate),
-          restriction,
-          subscriptionPlan: { connect: { id: subscriptionPlanId } },
+          validForPlanId,
         },
       });
       res.json(coupon);

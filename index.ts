@@ -1,5 +1,6 @@
 import express from 'express';
 const app = express();
+import cors from 'cors'
 const port = 5000;
 
 import agencyRouter from './routes/agency.js';
@@ -8,6 +9,7 @@ import couponRouter from './routes/coupon.js';
 import membershipRouter from './routes/membership.js';
 
 app.use(express.json());
+app.use(cors());
 
 app.get('/', (req, res) => {
     res.send('Hello World!');

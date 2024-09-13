@@ -29,13 +29,12 @@ export default {
   },
 
   createSubscriptionPlan: async (req: Request, res: Response) => {
-    const { planName, planCost, features } = req.body;
+    const { planName, planCost } = req.body;
     try {
       const subscriptionPlan = await prisma.subscriptionPlan.create({
         data: {
           planName,
           planCost,
-          // features,
         },
       });
       res.status(201).json(subscriptionPlan);
